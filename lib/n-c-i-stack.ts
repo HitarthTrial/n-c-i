@@ -14,6 +14,7 @@ export class NCIStack extends cdk.Stack {
     // Export the VPC ID for use in the API stack
     new cdk.CfnOutput(this, 'VpcId', {
       value: vpc.vpcId,
+      exportName: 'VpcId',
     });
   }
 }
