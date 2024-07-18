@@ -5,7 +5,7 @@ on:
     branches:
       - hitarth-poc
     paths:
-        - '../../lambda/**'
+        - 'lambda/**'
 
 env:
   AWS_REGION: us-east-1  # Change to reflect your Region
