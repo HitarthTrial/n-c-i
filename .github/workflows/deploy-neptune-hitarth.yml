@@ -1,0 +1,61 @@
+name: Deploy Neptune using IAM role demo
+
+on:
+  push:
+    branches: [hitarth-poc]
+  pull_request:
+    branches: [hitarth-poc]
+
+env:
+  AWS_REGION: us-east-1  # Change to reflect your Region
+
+permissions:
+  id-token: write  # This is required for requesting the JWT
+  contents: read   # This is required for actions/checkout
+
+jobs:
+  AssumeRoleAndCallIdentity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Print OIDC Token
+        id: print-token
+        run: |
+          echo "Requesting OIDC token..."
+          echo "URL: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_URL }}"
+          echo "URL with environment variable: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}"
+          echo "Requesting the token..."
+          RESPONSE=$(curl -H "Authorization: bearer $ACTIONS_RUNTIME_TOKEN" $ACTIONS_ID_TOKEN_REQUEST_URL)
+          echo "OIDC Token Response: $RESPONSE"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+      - name: configure aws credentials
+        id: aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::381492094283:role/GitHubAction-AssumeRoleWithAction  # Change to reflect your IAM role’s ARN
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+        env:
+          ACTIONS_STEP_DEBUG: true
+
+      # Hello from AWS: WhoAmI
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+        env:
+          ACTIONS_STEP_DEBUG: true
+
+      - name: Deploy CDK Stacks
+        run: cdk deploy --all --require-approval never
