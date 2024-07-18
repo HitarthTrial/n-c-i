@@ -7,8 +7,9 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1  # Change to reflect your Region
-
+  AWS_REGION: ${{ vars.AWS_REGION }}  # Change to reflect your Region
+  AWS_ASSUME_ROLE: ${{ secrets.AWS_ASSUME_ROLE_HITARTH }}
+  
 permissions:
   id-token: write  # This is required for requesting the JWT
   contents: read   # This is required for actions/checkout
@@ -44,7 +45,7 @@ jobs:
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
-          role-to-assume: arn:aws:iam::381492094283:role/GitHubAction-AssumeRoleWithAction  # Change to reflect your IAM role’s ARN
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}  # Change to reflect your IAM role’s ARN
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
         env:
