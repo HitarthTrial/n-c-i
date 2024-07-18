@@ -2,9 +2,10 @@ name: Deploy Neptune using IAM role demo
 
 on:
   push:
-    branches: [hitarth-poc]
-  pull_request:
-    branches: [hitarth-poc]
+    branches:
+      - hitarth-poc
+    paths:
+        - '../../lambda/**'
 
 env:
   AWS_REGION: us-east-1  # Change to reflect your Region
